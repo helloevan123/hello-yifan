@@ -1,17 +1,14 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>产品参数汇总</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" defer></script>
 <style>
 /* Layout: header → tabs (Sheet | Collections). Sheet: upload, files to save, product sheet, saved files. Collections: list + detail */
 /* Single light look on white, by request: same in every theme */
 :root{
   --bg:#ffffff;--panel:#f5f7f6;--panel2:#edf2f0;--ink:#15201e;--ink2:#3b4b48;--mute:#6a7a77;--line:#e2e8e6;--line2:#cdd7d4;
   --acc:#0b6e69;--acc-ink:#ffffff;--acc-soft:#e3f0ee;
-  --dup:#9a4d06;--dup-soft:#fdf0db;--pend:#375a88;--pend-soft:#e9eff8;--danger:#b4321f;
-  --f-ui:"IBM Plex Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --dup:#9a4d06;--dup-soft:#fdf0db;--low:#17703a;--low-soft:#e2f3e7;--low-line:#9fd3ae;--pend:#375a88;--pend-soft:#e9eff8;--danger:#b4321f;
+  --f-ui:"IBM Plex Sans","PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-code:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
   --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:17px;--fs-xl:24px;
   color-scheme:light;
@@ -128,6 +125,20 @@ details.lay>summary{cursor:pointer;padding:10px 0;font-size:var(--fs-md);font-we
 .addform{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;padding-top:10px;border-top:1px solid rgba(11,110,105,.18);margin-top:2px}
 .addform .field{width:200px;max-width:100%}
 .addform .prog{flex-basis:100%;margin:0}
+.lowbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;font-size:var(--fs-sm);color:var(--ink2);margin:0 0 10px;padding:8px 12px;border:1px solid var(--line);border-radius:10px}
+.lowbar>.lbl{color:var(--low);font-weight:600;font-size:var(--fs-sm)}
+.lowbar select{max-width:120px}
+.lowbar input[type=number]{width:110px}
+.lowbar .key{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:var(--mute);font-size:var(--fs-xs)}
+.lowbar .sw{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--low-soft);box-shadow:inset 0 0 0 1px var(--low-line)}
+td.price.low{background:var(--low-soft)!important;color:var(--low);font-weight:600}
+td.price.low .cur{color:var(--low)}
+.chip.low{background:var(--low-soft);color:var(--low)}
+.b-low{background:var(--low-soft);color:var(--low)}
+.b-best{background:var(--bg);color:var(--low);box-shadow:inset 0 0 0 1px var(--low-line)}
+.tile.islow:not(.sel){border-color:var(--low-line)}
+.spec dd.low{color:var(--low)}
+.vrow .vp.low{color:var(--low)}
 .hidbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:var(--fs-sm);color:var(--mute);margin:0 0 10px}
 
 /* table */
@@ -313,6 +324,15 @@ figcaption{font-size:var(--fs-xs);color:var(--mute);margin-top:6px}
           </form>
         </div>
         <div class="chips" id="chips"></div>
+        <div class="lowbar" id="lowBar" hidden>
+          <span class="lbl" data-i18n="lowLine"></span>
+          <select id="lowCur" aria-label="Currency"></select>
+          <span aria-hidden="true">≤</span>
+          <input type="number" id="lowV" min="0" step="0.1" inputmode="decimal">
+          <button type="button" class="link" id="lowAuto" data-i18n="lowAuto"></button>
+          <label class="chk"><input type="checkbox" id="lowOnly"><span data-i18n="lowOnly"></span></label>
+          <span class="key"><i class="sw"></i><span id="lowKey"></span></span>
+        </div>
         <div class="hidbar" id="hidBar" hidden><span id="hidN"></span><label class="chk"><input type="checkbox" id="showHid"><span data-i18n="showHidden"></span></label><button class="link" id="restoreAll" data-i18n="restoreAll"></button></div>
         <p class="tips" id="tips"></p>
         <p class="prog err" id="expMsg" hidden></p>
@@ -370,7 +390,7 @@ h1:'产品参数总表',
 sub:'上传 Excel,读取型号、电池、W数、人民币价、美金价和产品图片,存进同一张共享总表;再挑选产品组成推荐组合。登录后看到的都是同一份数据。',
 connecting:'正在连接…',notConnected:'未连接共享总表',notSigned:'未登录',roleW:'可上传',roleR:'只读',signOut:'退出登录',
 gateSync:'和共享总表的连接断开了,请刷新页面。',gateLoading:'正在连接共享总表…',
-gateLocal:'现在没有连上共享总表(没有登录 claude.ai,或者是在预览里打开的)。上传的表格只在你这台设备上处理,别人看不到,也不能导出。请登录 claude.ai 后打开这个页面的链接,就能和同事共用同一份数据。',
+gateLocal:'这个网页版的数据只保存在当前浏览器里:刷新或关闭页面后,需要重新上传 Excel;别人也看不到你上传的内容。',
 gateRO:'你现在是只读权限:可以查看总表和推荐组合、导出 Excel,但不能保存上传的表格或修改组合。需要的话,请让表格主人在分享设置里把你设为可编辑。',
 loginH:'登录产品参数总表',tabIn:'登录',tabUp:'注册新用户',
 lu:'用户名',luPh:'例如:王小明',lp:'密码',lpPh:'至少 6 位',lp2:'再输入一次密码',
@@ -412,6 +432,7 @@ emLoading:'正在读取共享总表…',emShared:'总表里还没有产品。上
 ordHintW:'拖动左边的 ⠿,或用 ↑ ↓、改序号调整产品先后;图库里可以直接拖动卡片。大家看到的是同一个顺序。',
 ordHintR:'产品按团队排好的顺序显示。',ordHintOff:'排序方式选“自定义顺序”后,可以手动调整产品先后。',
 tipSel:'勾选产品后可以加入推荐组合。按住 Shift 点方框,可以一次选中一段。',
+lowLine:'低价线',lowAuto:'自动',lowOnly:'只看低价',lowPhAuto:'自动 {v}',lowPhNone:'输入价格',lowKey:'绿色 = 不高于低价线。自动 = 最便宜的三分之一。',lowT:'不高于低价线 {v}',chLow:'低价 {n} 行',chBest:'同款最低价 {n} 行',bLow:'低价',bBest:'同款最低价',bBestT:'同一型号、同一W数有 {n} 个报价,这一行最便宜',xBest:'同款最低价',xLow:'低价',col_mark:'价格标记',
 col_pos:'顺序',col_model:'型号',col_img:'主图',col_img2:'顶盖图',col_battery:'电池',col_watt:'W数',col_rmb:'人民币价',col_usd:'美金价',col_file:'来源文件',col_by:'上传人',col_at:'上传时间',col_dup:'重复',
 mvUp:'往前移',mvDn:'往后移',posOf:'{m} 的位置',dragRow:'拖动调整位置',
 bDup:'重复 ×{n}',bDupT:'出现在:{files}',viewAll:'查看 {m} 的全部参数',noImg:'无图',
@@ -443,7 +464,7 @@ h1:'Product Spec Sheet',
 sub:'Upload Excel files to collect model, battery, wattage, RMB and USD prices and product photos into one shared sheet, then group products into recommendation collections. Everyone who signs in sees the same data.',
 connecting:'Connecting…',notConnected:'Not connected',notSigned:'Not signed in',roleW:'Can upload',roleR:'View only',signOut:'Sign out',
 gateSync:'Lost the connection to the shared sheet. Please reload the page.',gateLoading:'Connecting to the shared sheet…',
-gateLocal:'Not connected to the shared sheet (you are not signed in to claude.ai, or this is a preview). Files you upload stay on this device only, nobody else sees them, and export is off. Sign in to claude.ai and open this page’s link to share one set of data with your team.',
+gateLocal:'On this website, data stays in this browser only: after a refresh or reopening the page, upload the Excel files again. Other people can’t see what you upload.',
 gateRO:'You have view-only access. You can browse the sheet and collections and export Excel, but you can’t save uploads or change collections. Ask the sheet owner to make you an editor if you need to.',
 loginH:'Sign in to the Product Spec Sheet',tabIn:'Sign in',tabUp:'Create account',
 lu:'Username',luPh:'e.g. Lily Wang',lp:'Password',lpPh:'At least 6 characters',lp2:'Repeat password',
@@ -485,6 +506,7 @@ emLoading:'Loading the shared sheet…',emShared:'No products yet. Upload an Exc
 ordHintW:'Drag ⠿ on the left, or use ↑ ↓ or type a position, to reorder products. In the gallery you can drag cards. Everyone sees the same order.',
 ordHintR:'Products are shown in the order set by the team.',ordHintOff:'Choose “Custom order” under Sort by to arrange products by hand.',
 tipSel:'Tick products to add them to a collection. Shift-click boxes to select a range.',
+lowLine:'Low-price line',lowAuto:'Auto',lowOnly:'Low prices only',lowPhAuto:'Auto {v}',lowPhNone:'Enter a price',lowKey:'Green = at or below the low-price line. Auto = the cheapest third.',lowT:'At or below the low-price line {v}',chLow:'{n} low-price rows',chBest:'{n} lowest-for-model rows',bLow:'Low',bBest:'Lowest for model',bBestT:'{n} quotes for this model and wattage; this row is the cheapest',xBest:'Lowest for model',xLow:'Low',col_mark:'Price mark',
 col_pos:'Order',col_model:'Model',col_img:'Main photo',col_img2:'Top cover',col_battery:'Battery',col_watt:'Wattage',col_rmb:'RMB price',col_usd:'USD price',col_file:'Source file',col_by:'Uploaded by',col_at:'Uploaded at',col_dup:'Duplicate',
 mvUp:'Move earlier',mvDn:'Move later',posOf:'Position of {m}',dragRow:'Drag to reorder',
 bDup:'Duplicate ×{n}',bDupT:'Appears in: {files}',viewAll:'See all specs for {m}',noImg:'No photo',
@@ -563,6 +585,7 @@ var STAGED=[],UPLIST=[],ROWS=[],KEYMAP={},RIDMAP={},PROF={},VIEW='table',LAYOUT=
 var ACCT=null,ACCOUNTS={},LTAB='in',ISOWNER=false,DELA=null,ACCLOADED=false;
 var ORD=[],CURKEYS=[],ordT=null,ordBusy=false,ordDirty=false,DRAGK=null;
 var HID={},SEL={},SHOWHID=false,LASTSEL=null,toastTm=null,toastFn=null;
+var LOW={cur:'usd',v:null,only:false},LOWV=null;
 var TAB='sheet',COMBOS={},CURCOMBO=null,CW={},CREN=false,CDEL=false,ADDOPEN=false,CDRAG=null;
 
 function normLayout(l){
@@ -759,8 +782,29 @@ function guessPrice(f){
     if(bp){take('rmb',bp[0],'ratioPair');take('usd',bp[1],'ratioPair')}
   }
 }
+var EXP=null;
+function loadExcel(){
+  if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  if(EXP)return EXP;
+  var urls=['https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js','https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js','https://unpkg.com/exceljs@4.4.0/dist/exceljs.min.js'];
+  function tryAt(i){
+    return new Promise(function(res,rej){
+      if(window.ExcelJS)return res(window.ExcelJS);
+      if(i>=urls.length)return rej(new Error('ExcelJS could not be loaded'));
+      var sc=document.createElement('script'),done=false;
+      var tm=setTimeout(function(){if(!done){done=true;sc.remove();tryAt(i+1).then(res,rej)}},15000);
+      sc.src=urls[i];sc.async=true;
+      sc.onload=function(){if(done)return;done=true;clearTimeout(tm);window.ExcelJS?res(window.ExcelJS):tryAt(i+1).then(res,rej)};
+      sc.onerror=function(){if(done)return;done=true;clearTimeout(tm);sc.remove();tryAt(i+1).then(res,rej)};
+      document.head.appendChild(sc);
+    });
+  }
+  EXP=tryAt(1).catch(function(e){EXP=null;throw e});
+  return EXP;
+}
 async function readFile(file){
-  var wb=new ExcelJS.Workbook();
+  var EX=await loadExcel();
+  var wb=new EX.Workbook();
   await wb.xlsx.load(await file.arrayBuffer());
   var media=wb.model.media||[],urlOf={};
   function getUrl(mid){
@@ -1071,6 +1115,7 @@ function rebuild(){
     if(!k.g[r.g]){k.g[r.g]=1;k.files.push(r.file)}
   });
   ROWS.forEach(function(r){var k=KEYMAP[r.key];r.dup=k.files.length>=2?k.files:null});
+  computeLow();drawLowBar();
   updateStatuses();render();
 }
 var RT=0;
@@ -1152,7 +1197,7 @@ function setHidden(keys,on,quiet){
   keys.forEach(function(k){if(on)HID[k]=1;else delete HID[k];delete SEL[k]});
   try{localStorage.setItem(hidKey(),JSON.stringify(Object.keys(HID)))}catch(e){}
   clearTimeout(prefT);prefT=setTimeout(pushPrefs,800);
-  draw();
+  computeLow();drawLowBar();draw();
   if(!quiet)toast(t(on?'toastHid':'toastRes',{n:keys.length}),t('undo'),function(){setHidden(keys,!on,true)});
 }
 function hideBtn(k,m){
@@ -1200,12 +1245,70 @@ function syncSel(){
   $('restoreAll').hidden=!hn;
 }
 
+/* ---------- low prices ---------- */
+function loadLow(){
+  try{var s=JSON.parse(localStorage.getItem('qt-low')||'null');if(s){LOW.cur=s.cur==='rmb'?'rmb':'usd';LOW.v=(typeof s.v==='number'&&isFinite(s.v))?s.v:null;LOW.only=!!s.only}}catch(e){}
+}
+function saveLow(){try{localStorage.setItem('qt-low',JSON.stringify(LOW))}catch(e){}}
+// Marks r.low (price at or below the low-price line) and r.best (cheapest quote for the
+// same model + wattage across different files). Auto line = cheapest third of the prices shown.
+function computeLow(){
+  var k=LOW.cur,vals=[];
+  ROWS.forEach(function(r){if(HID[r.key])return;var n=numAt(r[k]);if(n!=null&&n>0)vals.push(n)});
+  vals.sort(function(a,b){return a-b});
+  if(LOW.v!=null)LOWV=LOW.v;
+  else LOWV=vals.length>=3?vals[Math.max(0,Math.ceil(vals.length/3)-1)]:null;
+  var groups={};
+  ROWS.forEach(function(r){
+    var n=numAt(r[k]);
+    r.low=n!=null&&n>0&&LOWV!=null&&n<=LOWV+1e-9;
+    r.best=false;r.bestN=0;
+    if(n==null||!(n>0))return;
+    var gk=r.key+'|'+String(fmt(r.watt)).toUpperCase().replace(/\s+/g,'');
+    (groups[gk]=groups[gk]||[]).push(r);
+  });
+  Object.keys(groups).forEach(function(gk){
+    var a=groups[gk],files={};a.forEach(function(r){files[r.g]=1});
+    if(Object.keys(files).length<2)return;
+    var ns=a.map(function(r){return numAt(r[k])}),min=Math.min.apply(null,ns),max=Math.max.apply(null,ns);
+    if(!(max>min))return;
+    a.forEach(function(r,i){if(ns[i]===min){r.best=true;r.bestN=a.length}});
+  });
+}
+function lowFmt(v){return v==null?'':(LOW.cur==='usd'?'$'+nUsd(v):'¥'+nRmb(v))}
+function drawLowBar(){
+  var bar=$('lowBar');bar.hidden=!ROWS.length;
+  var sel=$('lowCur');
+  if(!sel.options.length||sel.dataset.lang!==LANG){
+    sel.innerHTML='';['usd','rmb'].forEach(function(c){var o=el('option',null,colName(c));o.value=c;sel.appendChild(o)});sel.dataset.lang=LANG;
+  }
+  sel.value=LOW.cur;
+  var inp=$('lowV');
+  if(document.activeElement!==inp)inp.value=LOW.v==null?'':String(LOW.v);
+  inp.step=LOW.cur==='usd'?'0.1':'0.01';
+  inp.placeholder=LOW.v==null?(LOWV!=null?t('lowPhAuto',{v:lowFmt(LOWV)}):t('lowPhNone')):'';
+  inp.setAttribute('aria-label',t('lowLine')+' '+colName(LOW.cur));
+  $('lowAuto').hidden=LOW.v==null;
+  $('lowOnly').checked=LOW.only;
+  $('lowKey').textContent=t('lowKey');
+}
+function lowChanged(){saveLow();computeLow();drawLowBar();draw();renderCombos()}
+function priceTd(td,r,k){
+  td.className='price';td.appendChild(priceNode(r[k],k));
+  if(k===LOW.cur&&r.low){td.classList.add('low');td.title=t('lowT',{v:lowFmt(LOWV)})}
+}
+function bestBadge(target,r){
+  if(!r.best)return;
+  var b=el('span','badge b-best',t('bBest'));b.title=t('bBestT',{n:r.bestN});target.appendChild(b);
+}
+
 /* ---------- table / gallery ---------- */
 function filtered(){
   var q=$('q').value.trim(),ql=q.toLowerCase(),qk=keyOf(q),dupOnly=$('dupOnly').checked;
   return ROWS.filter(function(r){
     if(HID[r.key]&&!SHOWHID)return false;
     if(dupOnly&&!r.dup)return false;
+    if(LOW.only&&!r.low)return false;
     if(!q)return true;
     return String(r.model).toLowerCase().indexOf(ql)>=0||(qk&&r.key.indexOf(qk)>=0);
   });
@@ -1248,6 +1351,9 @@ function draw(){
     chip(t('chRows',{n:ROWS.length}));chip(t('chModels',{n:Object.keys(models).length}));
     var dn=Object.keys(dupModels).length;if(dn)chip(t('sumDup',{n:dn}),'dup');
     if(pend)chip(t('sumPend',{n:pend}),'pend');
+    var ln=0,bn=0;ROWS.forEach(function(r){if(HID[r.key])return;if(r.low)ln++;if(r.best)bn++});
+    if(ln)chip(t('chLow',{n:ln}),'low');
+    if(bn)chip(t('chBest',{n:bn}),'low');
     if(list.length!==ROWS.length)chip(t('sumShown',{n:list.length}));
     if(list.length>500)chip(t('sumCap'));
   }
@@ -1265,9 +1371,8 @@ function draw(){
   var ex=$('exp');
   if(!ex.dataset.busy){
     ex.textContent=list.length&&list.length!==ROWS.length?t('expN',{n:list.length}):t('exp');
-    ex.disabled=!list.length||!DL;
+    ex.disabled=!list.length;
   }
-  ex.title=DL?'':t('expLogin');
   if(VIEW==='table')drawTable(list,cols);else drawGal(list,cols);
   syncSel();
 }
@@ -1325,10 +1430,10 @@ function drawTable(list,cols){
     if(movable)rowDrag(row,r.key);
     cols.forEach(function(k){
       var td=el('td');
-      if(k==='model'){if(first){td.appendChild(el('span','code',r.model));badges(td,r)}else td.appendChild(el('span','muted code',r.model))}
+      if(k==='model'){if(first){td.appendChild(el('span','code',r.model));badges(td,r)}else td.appendChild(el('span','muted code',r.model));bestBadge(td,r)}
       else if(k==='img'||k==='img2'){
         if(r[k]&&first){var b=el('button','thumb');b.title=t('viewAll',{m:r.model});var im=el('img');im.src=r[k];im.alt=r.model+' '+colName(k);im.loading='lazy';im.draggable=false;b.appendChild(im);b.onclick=function(){openDetail(r.key)};td.appendChild(b)}
-      }else if(PRICE[k]){td.className='price';td.appendChild(priceNode(r[k],k))}
+      }else if(PRICE[k])priceTd(td,r,k);
       else{
         td.textContent=cellText(r,k);
         if(k==='file'||k==='by'||k==='at')td.className='muted';
@@ -1355,7 +1460,9 @@ function specGrid(rows,cols,max){
     if(PRICE[k]){var a=rows.map(function(r){return numAt(r[k])}).filter(function(x){return x!=null});v=a.length?rangeOf(a,k==='usd'?function(x){return '$'+nUsd(x)}:function(x){return '¥'+nRmb(x)}):''}
     else{var seen=[];rows.forEach(function(r){var s=cellText(r,k);if(s&&seen.indexOf(s)<0)seen.push(s)});v=seen.join(' / ')}
     if(!v)return;
-    dl.appendChild(el('dt',null,colName(k)));var dd=el('dd',null,v);dd.title=v;dl.appendChild(dd);n++;
+    dl.appendChild(el('dt',null,colName(k)));var dd=el('dd',null,v);dd.title=v;
+    if(k===LOW.cur&&rows.some(function(r){return r.low}))dd.className='low';
+    dl.appendChild(dd);n++;
   });
   return n?dl:null;
 }
@@ -1381,14 +1488,18 @@ function drawGal(list,cols){
   var g=$('gview');g.innerHTML='';
   var movable=canOrder(),showPos=LAYOUT.sort==='custom',groups=groupsOf(list);
   groups.slice(0,500).forEach(function(G,idx){
-    var tile=el('div','tile'+(HID[G.key]?' ishid':(G.dup?' isdup':''))+(SEL[G.key]?' sel':''));
+    var gLow=G.rows.some(function(r){return r.low}),gBest=G.rows.filter(function(r){return r.best})[0];
+    var tile=el('div','tile'+(HID[G.key]?' ishid':(gLow?' islow':(G.dup?' isdup':'')))+(SEL[G.key]?' sel':''));
     var b=el('button','tmain');b.title=t('viewAll',{m:G.model});
     var box=el('div','im');
     var src=G.img||G.img2;
     if(src){var im=el('img');im.src=src;im.alt=G.model;im.loading='lazy';im.draggable=false;box.appendChild(im)}else box.textContent=t('noImg');
     b.appendChild(box);
     var body=el('div','tbody');
-    var t1=el('div','tname');t1.appendChild(el('span','code',G.model));badges(t1,{dup:G.dup,pending:G.pending,key:G.key});body.appendChild(t1);
+    var t1=el('div','tname');t1.appendChild(el('span','code',G.model));badges(t1,{dup:G.dup,pending:G.pending,key:G.key});
+    if(gLow)t1.appendChild(el('span','badge b-low',t('bLow')));
+    if(gBest)bestBadge(t1,gBest);
+    body.appendChild(t1);
     var sg=specGrid(G.rows,cols,3);if(sg)body.appendChild(sg);
     b.appendChild(body);
     b.onclick=function(){openDetail(G.key)};
@@ -1437,10 +1548,11 @@ function openDetail(key){
   var dd=$('dd');dd.innerHTML='';
   rows.forEach(function(r){
     var row=el('tr');
-    cols.forEach(function(k){
+    cols.forEach(function(k,ci){
       var td=el('td');
-      if(PRICE[k]){td.className='price';td.appendChild(priceNode(r[k],k))}
+      if(PRICE[k])priceTd(td,r,k);
       else{td.textContent=cellText(r,k)||'—';if(k==='file'||k==='by'||k==='at')td.className='muted'}
+      if(ci===0)bestBadge(td,r);
       row.appendChild(td);
     });
     dd.appendChild(row);
@@ -1647,7 +1759,7 @@ function drawComboDetail(id){
   head.appendChild(left);
   var acts=el('div','btns');
   if(edit&&!CREN){var rn=el('button','quiet mini',t('rename'));rn.onclick=function(){CREN=true;renderCombos()};acts.appendChild(rn)}
-  var ex=el('button','mini',t('exportCombo'));ex.disabled=!DL||!st.specs;ex.title=DL?'':t('expLogin');ex.onclick=function(){exportCombo(id,ex)};acts.appendChild(ex);
+  var ex=el('button','mini',t('exportCombo'));ex.disabled=!st.specs;ex.onclick=function(){exportCombo(id,ex)};acts.appendChild(ex);
   if(edit){
     if(CDEL){
       acts.appendChild(el('span','fmeta',t('delComboQ')));
@@ -1684,7 +1796,7 @@ function drawComboDetail(id){
       var mid=el('span');
       var main=[fw(r.watt),fmt(r.battery)].filter(Boolean).join(' · ')||'—';mid.appendChild(document.createTextNode(main));
       if(r.dup)mid.appendChild(el('small',null,r.file));
-      var pr=el('span','vp');
+      var pr=el('span','vp'+(r.low?' low':''));
       var parts=[];if(cols.indexOf('usd')>=0&&numAt(r.usd)!=null)parts.push('$'+nUsd(numAt(r.usd)));if(cols.indexOf('rmb')>=0&&numAt(r.rmb)!=null)parts.push('¥'+nRmb(numAt(r.rmb)));
       pr.textContent=parts.join(' / ');
       vr.appendChild(cb);vr.appendChild(mid);vr.appendChild(pr);vl.appendChild(vr);
@@ -1908,9 +2020,10 @@ function toPng(url){
 async function buildBook(o){
   var W={model:18,img:15,img2:15,battery:16,watt:10,rmb:12,usd:12,file:28,by:14,at:18};
   var cols=o.cols,anyDup=!!o.dupCol;
-  var wb=new ExcelJS.Workbook(),ws=wb.addWorksheet(o.sheet);
-  ws.columns=cols.map(function(k){return {width:W[k]}}).concat(anyDup?[{width:40}]:[]);
-  var hdr=cols.map(colName).concat(anyDup?[colName('dup')]:[]),r0=0;
+  var EX=await loadExcel();
+  var wb=new EX.Workbook(),ws=wb.addWorksheet(o.sheet);
+  ws.columns=cols.map(function(k){return {width:W[k]}}).concat(anyDup?[{width:40}]:[]).concat(o.markCol?[{width:18}]:[]);
+  var hdr=cols.map(colName).concat(anyDup?[colName('dup')]:[]).concat(o.markCol?[colName('mark')]:[]),r0=0;
   if(o.title){
     ws.addRow([o.title]);ws.mergeCells(1,1,1,Math.max(1,hdr.length));
     var tr=ws.getRow(1);tr.font={bold:true,size:14};tr.height=26;tr.alignment={vertical:'middle'};r0=1;
@@ -1928,10 +2041,13 @@ async function buildBook(o){
       return cellText(r,k);
     });
     if(anyDup)vals.push(r.dup?t('xDup',{files:r.dup.join(' / ')}):'');
+    if(o.markCol)vals.push([r.low?t('xLow'):'',r.best?t('xBest'):''].filter(Boolean).join(' · '));
     var row=ws.addRow(vals);row.alignment={vertical:'middle',wrapText:true};
     if(ui>=0)row.getCell(ui+1).numFmt='0.0';
     if(ri>=0)row.getCell(ri+1).numFmt='0.00';
     if(r.dup&&mi>=0)row.getCell(mi+1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFCEFD9'}};
+    var li2=cols.indexOf(LOW.cur);
+    if(r.low&&li2>=0){var lc=row.getCell(li2+1);lc.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE2F3E7'}};lc.font={bold:true,color:{argb:'FF17703A'}}}
     for(var j=0;j<cols.length;j++){
       var k=cols[j];if(k!=='img'&&k!=='img2')continue;
       var u=r[k];if(!u)continue;
@@ -1955,20 +2071,27 @@ async function buildBook(o){
   }
   return wb.xlsx.writeBuffer();
 }
+function saveFile(name,buf){
+  if(DL)return DL.save({filename:name,data:buf});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
+  return Promise.resolve();
+}
 function today(){var d=new Date(),p=function(n){return(n<10?'0':'')+n};return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())}
 async function exportXlsx(){
   var m=$('expMsg');m.hidden=true;
-  if(!DL){m.textContent=t('expLogin');m.hidden=false;return}
   var list=sorted(filtered()),btn=$('exp');
   btn.dataset.busy='1';btn.disabled=true;btn.textContent=t('expBusy');
   try{
-    var buf=await buildBook({sheet:t('xSheet'),cols:visibleCols(),rows:list,dupCol:list.some(function(r){return r.dup})});
-    await DL.save({filename:t('xFile',{d:today()}),data:buf});
+    var buf=await buildBook({sheet:t('xSheet'),cols:visibleCols(),rows:list,dupCol:list.some(function(r){return r.dup}),markCol:list.some(function(r){return r.low||r.best})});
+    await saveFile(t('xFile',{d:today()}),buf);
   }catch(e){if(!(e&&e.code==='declined')){m.textContent=t('expFail',{m:(e&&e.message)||e});m.hidden=false}}
   delete btn.dataset.busy;draw();
 }
 async function exportCombo(id,btn){
-  var d=COMBOS[id];if(!d||!DL)return;
+  var d=COMBOS[id];if(!d)return;
   var rows=[];
   (d.items||[]).forEach(function(it){var inc={};(it.r||[]).forEach(function(x){inc[x]=1});rowsOfKey(it.k).forEach(function(r){if(inc[r.rid])rows.push(r)})});
   var cols=visibleCols().filter(function(k){return ['file','by','at'].indexOf(k)<0});
@@ -1976,7 +2099,7 @@ async function exportCombo(id,btn){
   try{
     var sheet=String(d.name).replace(/[\[\]:*?\/\\]/g,' ').slice(0,31)||t('xSheet');
     var buf=await buildBook({sheet:sheet,title:d.name,cols:cols,rows:rows,total:true});
-    await DL.save({filename:String(d.name).replace(/[\\\/:*?"<>|]/g,' ').trim()+'_'+today()+'.xlsx',data:buf});
+    await saveFile(String(d.name).replace(/[\\\/:*?"<>|]/g,' ').trim()+'_'+today()+'.xlsx',buf);
   }catch(e){if(!(e&&e.code==='declined'))toast(t('expFail',{m:(e&&e.message)||e}))}
   btn.disabled=false;btn.textContent=label;
 }
@@ -2010,6 +2133,11 @@ $('showHid').onchange=function(){SHOWHID=this.checked;draw()};
 $('restoreAll').onclick=function(){setHidden(Object.keys(HID).filter(function(k){return KEYMAP[k]}),false)};
 $('toastBtn').onclick=function(){var f=toastFn;toastFn=null;$('toast').hidden=true;clearTimeout(toastTm);if(f)f()};
 $('tSheet').onclick=function(){setMainTab('sheet')};$('tCombo').onclick=function(){setMainTab('combo')};
+$('lowCur').onchange=function(){LOW.cur=this.value==='rmb'?'rmb':'usd';LOW.v=null;lowChanged()};
+$('lowV').onchange=function(){var v=parseFloat(this.value);LOW.v=(isFinite(v)&&v>0)?v:null;lowChanged()};
+$('lowV').onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();this.blur();$('lowV').onchange.call(this)}};
+$('lowAuto').onclick=function(){LOW.v=null;lowChanged();$('lowV').focus()};
+$('lowOnly').onchange=function(){LOW.only=this.checked;lowChanged()};
 $('q').oninput=draw;$('dupOnly').onchange=draw;$('exp').onclick=exportXlsx;
 $('lform').onsubmit=submitLogin;
 $('tabIn').onclick=function(){setTab('in');lerr('')};$('tabUp').onclick=function(){setTab('up');lerr('')};
@@ -2018,6 +2146,7 @@ $('len').onclick=$('een').onclick=function(){setLang('en')};
 window.addEventListener('hashchange',function(){var h=(location.hash||'').replace('#','').toLowerCase();if((h==='en'||h==='zh')&&h!==LANG)setLang(h)});
 
 LANG=initLang();
+loadLow();
 try{var v=localStorage.getItem('qt-view');if(v==='gal'){VIEW='gal';$('vt').setAttribute('aria-pressed','false');$('vg').setAttribute('aria-pressed','true')}}catch(e){}
 try{var tb0=localStorage.getItem('qt-tab');if(tb0==='combo')TAB='combo'}catch(e){}
 applyStatic();drawLayout();applyMode(true);
