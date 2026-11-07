@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>橘团表情包</title>
+<meta name="description" content="一只圆滚滚的小橘猫，16 张会动的微信表情。点开就能保存，也能改成你想说的话。">
+<meta property="og:title" content="橘团表情包">
+<meta property="og:description" content="16 张会动的小橘猫表情，点开就能保存，也能改成你想说的话。">
+<meta property="og:image" content="https://helloevan123.github.io/hello-yifan/stickers/png/01-hello.png">
+<link rel="icon" href="png/01-hello.png">
+<style>
+:root{
+  --bg:#fff7ec;--card:#ffffff;--ink:#3b2a20;--ink2:#6b5444;--mute:#8f7864;--line:#f0e0ca;--line2:#e6cfb2;
+  --acc:#ff8a3d;--acc-d:#d9661c;--acc-soft:#ffecd9;
+  --f-ui:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  --f-cute:"ZCOOL KuaiLe",var(--f-ui);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--f-ui);-webkit-font-smoothing:antialiased}
+img,canvas{display:block;max-width:100%}
+main{max-width:960px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px calc(56px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--f-cute);font-weight:400;margin:0;line-height:1.2;letter-spacing:.02em}
+h1{font-size:40px}
+h2{font-size:26px}
+h3{font-size:24px;text-align:center}
+p{margin:0}
+.hint{color:var(--mute);font-size:14px}
+a{color:var(--acc-d)}
+
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font:500 15px/1 var(--f-ui);text-decoration:none;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn:hover{border-color:var(--acc)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.primary:hover{background:var(--acc-d);border-color:var(--acc-d)}
+.btn small{font-size:12px;opacity:.85;font-weight:400}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn:focus-visible,.tile:focus-visible,.pose:focus-visible,.sw:focus-visible,input:focus-visible{outline:3px solid #2e9bff;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+
+.hero{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"img title" "lead lead" "act act";align-items:center;column-gap:8px;row-gap:12px}
+.hero img{grid-area:img;width:112px;height:112px;margin:-8px 0 -8px -10px}
+.hero h1{grid-area:title}
+.hero .lead{grid-area:lead;color:var(--ink2);max-width:34em}
+.hero .row{grid-area:act}
+@media (min-width:640px){
+  .hero{grid-template-areas:"img title" "img lead" "img act";column-gap:20px;row-gap:10px;align-items:start}
+  .hero img{width:168px;height:168px;align-self:center}
+  .hero h1{align-self:end}
+}
+
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (min-width:760px){.grid{grid-template-columns:repeat(8,1fr);gap:10px}}
+.tile{display:block;width:100%;aspect-ratio:1;padding:2px;border:1.5px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;transition:transform .12s,border-color .12s;-webkit-tap-highlight-color:transparent}
+.tile:hover{border-color:var(--acc)}
+.tile:active{transform:scale(.96)}
+.tile img{width:100%;height:100%}
+
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:24px;padding:20px}
+.ed{display:grid;gap:20px;align-items:start}
+@media (min-width:720px){.ed{grid-template-columns:300px 1fr}}
+.preview{display:flex;flex-direction:column;align-items:center;gap:10px}
+.stage{width:100%;max-width:300px;aspect-ratio:1;border-radius:20px;background:#ededed;display:grid;place-items:center;transition:background .2s}
+.stage canvas{width:240px;height:240px}
+.stage.dark{background:#1e1e1e}
+.bgtoggle{min-height:36px;padding:0 14px;font-size:13px}
+.controls{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lbl{font-weight:600;font-size:15px;margin-top:8px}
+.lbl:first-child{margin-top:0}
+input[type=text]{width:100%;min-height:48px;padding:10px 14px;border:1.5px solid var(--line2);border-radius:14px;background:#fff;color:var(--ink);font:20px/1.2 var(--f-cute)}
+.poses{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+@media (max-width:420px){.poses{grid-template-columns:repeat(6,1fr)}}
+.pose{aspect-ratio:1;padding:2px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pose canvas{width:100%;height:100%}
+.pose[aria-checked=true]{border-color:var(--acc);background:var(--acc-soft);box-shadow:0 0 0 2px var(--acc) inset}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:36px;height:36px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line2);cursor:pointer;padding:0}
+.sw[aria-checked=true]{box-shadow:0 0 0 2.5px var(--ink)}
+.controls .btn.primary{margin-top:14px;align-self:flex-start;min-width:160px}
+.result{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1.5px dashed var(--line2)}
+.result img{width:160px;height:160px;border-radius:16px;background:#ededed}
+.result > div{flex:1 1 220px;display:flex;flex-direction:column;gap:12px}
+
+.how ol{margin:12px 0 0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.how li::marker{color:var(--acc-d);font-weight:700}
+.how .hint{margin-top:12px}
+footer{color:var(--mute);font-size:13px;text-align:center}
+
+dialog:not([open]){display:none}
+dialog{border:none;padding:0;border-radius:28px;background:var(--card);color:var(--ink);width:min(360px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(59,42,32,.25)}
+dialog::backdrop{background:rgba(59,42,32,.45)}
+.sheet{padding:20px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative}
+.sheet img{width:240px;height:240px;border-radius:20px;background:#ededed}
+.sheet .row{justify-content:center;margin-top:4px}
+.x{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:none;background:var(--acc-soft);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+@media (max-width:380px){h1{font-size:34px}.hero img{width:104px;height:104px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <img src="gif/01-hello.gif" width="240" height="240" alt="">
+    <h1>橘团表情包</h1>
+    <p class="lead">一只圆滚滚的小橘猫，16 张会动的表情。点一张就能保存，也能改成你想说的话。</p>
+    <div class="row">
+      <a class="btn primary" href="judan-stickers.zip" download="橘团表情包.zip">下载全部 <small>ZIP · 约 3 MB</small></a>
+      <a class="btn" href="#editor">我要改字</a>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-all">
+    <div class="sec-head">
+      <h2 id="h-all">全部表情</h2>
+      <p class="hint">点一下看大图、下载</p>
+    </div>
+    <ul class="grid" id="grid"></ul>
+  </section>
+
+  <section id="editor" class="card" aria-labelledby="h-ed">
+    <div class="sec-head">
+      <h2 id="h-ed">改成你想说的话</h2>
+      <p class="hint">换个动作、换句话，做一张自己的</p>
+    </div>
+    <div class="ed">
+      <div class="preview">
+        <div class="stage" id="stage">
+          <canvas id="live" width="480" height="480" role="img" aria-label="表情预览"></canvas>
+        </div>
+        <button type="button" class="btn bgtoggle" id="bgtoggle" aria-pressed="false">放到深色背景上看看</button>
+      </div>
+      <div class="controls">
+        <label class="lbl" for="txt">文字</label>
+        <input type="text" id="txt" maxlength="12" autocomplete="off" enterkeyhint="done" placeholder="想说的话">
+        <p class="hint">最多 12 个字，长了会自动分两行；不写字就是一张纯动作的表情。</p>
+        <div class="lbl" id="l-pose">动作</div>
+        <div class="poses" id="poses" role="radiogroup" aria-labelledby="l-pose"></div>
+        <div class="lbl" id="l-color">字的颜色</div>
+        <div class="swatches" id="swatches" role="radiogroup" aria-labelledby="l-color"></div>
+        <button type="button" class="btn primary" id="make">生成表情</button>
+      </div>
+    </div>
+    <div class="result" id="result" hidden>
+      <img id="out" width="240" height="240" alt="做好的表情">
+      <div>
+        <p><b>做好啦！</b>长按图片可以存到相册，也可以点下面下载。</p>
+        <div class="row">
+          <a class="btn primary" id="dl-gif" href="#" download>下载 GIF</a>
+          <a class="btn" id="dl-png" href="#" download>下载高清 PNG</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" aria-labelledby="h-how">
+    <h2 id="h-how">怎么加到微信</h2>
+    <ol>
+      <li><b>存到手机：</b>点开一张表情，长按图片，存到相册。</li>
+      <li><b>加进微信：</b>聊天时点输入框旁的笑脸 → 爱心那一栏 → 「+」，从相册选刚存的图。</li>
+      <li><b>用电脑：</b>下载 ZIP 解压，把 GIF 发给「文件传输助手」，在手机上长按那张图 →「添加到表情」。</li>
+    </ol>
+    <p class="hint">在微信里打开这个页面时，如果存下来的图不会动，换成手机自带的浏览器打开再存一次。动图是 240×240 的 GIF，正好是微信表情的尺寸。</p>
+  </section>
+
+  <footer>文字字体：站酷快乐体（ZCOOL KuaiLe），SIL Open Font License 1.1</footer>
+</main>
+
+<dialog id="sheet" aria-labelledby="sheet-title">
+  <div class="sheet">
+    <button type="button" class="x" id="sheet-x" aria-label="关闭">×</button>
+    <img id="big" width="240" height="240" alt="">
+    <h3 id="sheet-title"></h3>
+    <p class="hint">长按图片可以直接保存</p>
+    <div class="row">
+      <a class="btn primary" id="sheet-gif" href="#" download>下载 GIF</a>
+      <a class="btn" id="sheet-png" href="#" download>高清 PNG</a>
+      <button type="button" class="btn" id="sheet-edit">改字</button>
+    </div>
+  </div>
+</dialog>
+
+<script type="module">
+import { STICKERS, drawFrame, renderFrames, encodeGIF, makePNG, loadFont } from './judan.js';
+
+const $ = s => document.querySelector(s);
+const fileOf = (i, ext) => `${ext}/${String(i + 1).padStart(2, '0')}-${STICKERS[i].id}.${ext}`;
+const safeName = (s, fallback) => s.replace(/[！？!?，。,.、\s\\/:*"<>|]/g, '') || fallback;
+
+/* 字体（站酷快乐体）一边加载一边先用系统字体；最多等 4 秒 */
+const fontLoad = loadFont();
+const fontReady = Promise.race([fontLoad, new Promise(r => setTimeout(r, 4000))]);
+
+/* ---------- 全部表情 ---------- */
+const grid = $('#grid');
+STICKERS.forEach((st, i) => {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'tile';
+  b.setAttribute('aria-label', `${st.text}，看大图`);
+  b.innerHTML = `<img src="${fileOf(i, 'gif')}" width="240" height="240" alt="${st.text}" loading="lazy">`;
+  b.addEventListener('click', () => openSheet(i));
+  li.append(b);
+  grid.append(li);
+});
+
+const sheet = $('#sheet');
+let sheetIdx = 0;
+function openSheet(i) {
+  const st = STICKERS[i];
+  sheetIdx = i;
+  $('#big').src = fileOf(i, 'gif');
+  $('#big').alt = st.text;
+  $('#sheet-title').textContent = st.text;
+  Object.assign($('#sheet-gif'), { href: fileOf(i, 'gif'), download: `橘团-${safeName(st.text, st.id)}.gif` });
+  Object.assign($('#sheet-png'), { href: fileOf(i, 'png'), download: `橘团-${safeName(st.text, st.id)}.png` });
+  if (typeof sheet.showModal === 'function') sheet.showModal();
+  else location.href = fileOf(i, 'gif'); // 很老的浏览器没有弹窗，直接打开动图
+}
+$('#sheet-x').addEventListener('click', () => sheet.close());
+sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
+$('#sheet-edit').addEventListener('click', () => {
+  sheet.close();
+  pick(sheetIdx, true);
+  $('#editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* ---------- 改字 ---------- */
+const COLORS = ['#ff8a3d', '#ff5a7a', '#ff4d4d', '#ffb800', '#3cb371', '#2ec4b6', '#2e9bff', '#8b7cf6', '#4a2c1d'];
+const txt = $('#txt'), poses = $('#poses'), swatches = $('#swatches');
+let cur = 0, color = null, edited = false;
+
+STICKERS.forEach((st, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'pose';
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-label', st.text);
+  b.setAttribute('aria-checked', 'false');
+  const c = document.createElement('canvas');
+  c.width = c.height = 112;
+  b.append(c);
+  b.addEventListener('click', () => pick(i));
+  poses.append(b);
+});
+// 动作小图：只画动作，不带字
+(async () => {
+  for (const [i, st] of STICKERS.entries()) {
+    const c = poses.children[i].firstChild;
+    await drawFrame(c.getContext('2d'), st, st.still ?? 0, { size: 112, text: '' });
+  }
+})();
+
+const swatchList = [null, ...COLORS];
+swatchList.forEach((c, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'sw';
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-label', c ? `颜色 ${c}` : '这张原来的颜色');
+  if (c) b.style.background = c;
+  b.addEventListener('click', () => { color = c; paintSwatches(); refresh(); });
+  swatches.append(b);
+});
+function paintSwatches() {
+  [...swatches.children].forEach((b, i) => b.setAttribute('aria-checked', String(swatchList[i] === color)));
+  swatches.firstChild.style.background = STICKERS[cur].color;
+}
+
+function pick(i, resetText = false) {
+  cur = i;
+  [...poses.children].forEach((b, j) => b.setAttribute('aria-checked', String(j === i)));
+  if (!edited || resetText) { txt.value = STICKERS[i].text; edited = false; }
+  paintSwatches();
+  refresh();
+}
+let typing;
+txt.addEventListener('input', () => { edited = true; clearTimeout(typing); typing = setTimeout(refresh, 220); });
+txt.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); txt.blur(); } });
+
+/* 实时预览：把这一张的每一帧画好，循环播放 */
+const live = $('#live'), lctx = live.getContext('2d');
+let frames = [], delay = 70, fi = 0, last = 0, token = 0;
+const opts = () => ({ text: txt.value, color: color || STICKERS[cur].color });
+async function refresh() {
+  const my = ++token;
+  await fontReady;
+  const st = STICKERS[cur];
+  const fr = await renderFrames(st, { ...opts(), size: live.width });
+  if (my !== token) return; // 期间又改了，丢掉旧的
+  frames = fr; delay = st.delay; fi = 0;
+}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+function loop(now) {
+  if (frames.length && now - last >= delay) {
+    lctx.putImageData(frames[fi], 0, 0);
+    fi = reduce.matches ? 0 : (fi + 1) % frames.length;
+    last = now;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+fontLoad.then(ok => ok && refresh()); // 字体晚到的话，换上正确的字体再画一遍
+
+$('#bgtoggle').addEventListener('click', e => {
+  const dark = $('#stage').classList.toggle('dark');
+  e.currentTarget.setAttribute('aria-pressed', String(dark));
+  e.currentTarget.textContent = dark ? '放回浅色背景' : '放到深色背景上看看';
+});
+
+/* 生成：240×240 透明 GIF（微信表情尺寸）+ 480×480 高清 PNG */
+const urls = [];
+$('#make').addEventListener('click', async e => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+  btn.textContent = '正在生成…';
+  try {
+    await fontReady;
+    const st = STICKERS[cur], o = opts();
+    const gif = new Blob([encodeGIF(await renderFrames(st, { ...o, size: 240 }), st.delay)], { type: 'image/gif' });
+    const png = await makePNG(st, o);
+    urls.splice(0).forEach(u => URL.revokeObjectURL(u));
+    const gu = URL.createObjectURL(gif), pu = URL.createObjectURL(png);
+    urls.push(gu, pu);
+    const name = `橘团-${safeName(o.text, st.id)}`;
+    $('#out').src = gu;
+    $('#out').alt = o.text || st.text;
+    Object.assign($('#dl-gif'), { href: gu, download: `${name}.gif` });
+    Object.assign($('#dl-png'), { href: pu, download: `${name}.png` });
+    $('#result').hidden = false;
+    $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    console.error(err);
+    alert('生成失败了，刷新页面再试一次。');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成表情';
+  }
+});
+
+pick(0);
+</script>
+</body>
+</html>
